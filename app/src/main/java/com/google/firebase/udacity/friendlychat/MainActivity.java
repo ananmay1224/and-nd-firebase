@@ -59,49 +59,49 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     public static final int RC_SIGN_IN = 1;
 
-    private ListView mMessageListView;
-    private MessageAdapter mMessageAdapter;
-    private ProgressBar mProgressBar;
-    private EditText mMessageEditText;
-    private Button mSendButton;
+    private ListView tmpMessageListView;
+    private MessageAdapter tmpMessageAdapter;
+    private ProgressBar tmpProgressBar;
+    private EditText tmpMessageEditText;
+    private Button tmpSendButton;
 
-    private String mUsername;
+    private String tmpUsername;
 
     //Firebase instance variables
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference mMessagesDatabaseReference;
-    private ChildEventListener mChildEventListener;
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseAuth.AuthStateListener mAuthStateListener;
+    private DatabaseReference tmpMessagesDatabaseReference;
+    private ChildEventListener tmpChildEventListener;
+    private FirebaseAuth tmpFirebaseAuth;
+    private FirebaseAuth.AuthStateListener tmpAuthStateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mUsername = ANONYMOUS;
+        tmpUsername = ANONYMOUS;
 
         firebaseDatabase = FirebaseDatabase.getInstance();
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        tmpFirebaseAuth = FirebaseAuth.getInstance();
 
-        mMessagesDatabaseReference = firebaseDatabase.getReference().child("messages");
+        tmpMessagesDatabaseReference = firebaseDatabase.getReference().child("messages");
 
         // Initialize references to views
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mMessageListView = (ListView) findViewById(R.id.messageListView);
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
-        mSendButton = (Button) findViewById(R.id.sendButton);
+        tmpProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        tmpMessageListView = (ListView) findViewById(R.id.messageListView);
+        tmpMessageEditText = (EditText) findViewById(R.id.messageEditText);
+        tmpSendButton = (Button) findViewById(R.id.sendButton);
 
         // Initialize message ListView and its adapter
         List<FriendlyMessage> friendlyMessages = new ArrayList<>();
-        mMessageAdapter = new MessageAdapter(this, R.layout.item_message, friendlyMessages);
-        mMessageListView.setAdapter(mMessageAdapter);
+        tmpMessageAdapter = new MessageAdapter(this, R.layout.item_message, friendlyMessages);
+        tmpMessageListView.setAdapter(tmpMessageAdapter);
 
         // Initialize progress bar
-        mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+        tmpProgressBar.setVisibility(ProgressBar.INVISIBLE);
 
         // Enable Send button when there's text to send
-        mMessageEditText.addTextChangedListener(new TextWatcher() {
+        tmpMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -109,9 +109,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.toString().trim().length() > 0) {
-                    mSendButton.setEnabled(true);
+                    tmpSendButton.setEnabled(true);
                 } else {
-                    mSendButton.setEnabled(false);
+                    tmpSendButton.setEnabled(false);
                 }
             }
 
@@ -119,22 +119,22 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
             }
         });
-        mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
+        tmpMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_MSG_LENGTH_LIMIT)});
 
         // Send button sends a message and clears the EditText
-        mSendButton.setOnClickListener(new View.OnClickListener() {
+        tmpSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // TODO: Send messages on click
-                FriendlyMessage friendlyMessage = new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, null);
-                mMessagesDatabaseReference.push().setValue(friendlyMessage);
+                FriendlyMessage friendlyMessage = new FriendlyMessage(tmpMessageEditText.getText().toString(), tmpUsername, null);
+                tmpMessagesDatabaseReference.push().setValue(friendlyMessage);
 
                 // Clear input box
-                mMessageEditText.setText("");
+                tmpMessageEditText.setText("");
             }
         });
 
-        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+        tmpAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -177,17 +177,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+        tmpFirebaseAuth.addAuthStateListener(tmpAuthStateListener);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mAuthStateListener != null) {
-            mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
+        if (tmpAuthStateListener != null) {
+            tmpFirebaseAuth.removeAuthStateListener(tmpAuthStateListener);
         }
         detachDatabaseListener();
-        mMessageAdapter.clear();
+        tmpMessageAdapter.clear();
     }
 
     @Override
@@ -210,25 +210,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onSignedInInitialize(String username) {
-        mUsername = username;
+        tmpUsername = username;
         attachDatabaseReadListener();
     }
 
     private void onSignedOutCleanup() {
-        mUsername = ANONYMOUS;
-        mMessageAdapter.clear();
+        tmpUsername = ANONYMOUS;
+        tmpMessageAdapter.clear();
     }
 
     private void attachDatabaseReadListener() {
-        if (mChildEventListener == null) {
-            mChildEventListener = new ChildEventListener() {
+        if (tmpChildEventListener == null) {
+            tmpChildEventListener = new ChildEventListener() {
                 @Override
                 //called whenever a new message is triggered in the list
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                     //to get the data of the new message
                     FriendlyMessage friendlyMessage = dataSnapshot.getValue(FriendlyMessage.class);
                     //we add a listener to our messaging list and when it is added, the onChildAdded is called
-                    mMessageAdapter.add(friendlyMessage);
+                    tmpMessageAdapter.add(friendlyMessage);
                 }
 
                 @Override
@@ -252,14 +252,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
             //the reference to find what exactly we are listening to and the listener object defines what will happen to the data
-            mMessagesDatabaseReference.addChildEventListener(mChildEventListener);
+            tmpMessagesDatabaseReference.addChildEventListener(tmpChildEventListener);
         }
     }
 
     private void detachDatabaseListener() {
-        if (mChildEventListener != null) {
-            mMessagesDatabaseReference.removeEventListener(mChildEventListener);
-            mChildEventListener = null;
+        if (tmpChildEventListener != null) {
+            tmpMessagesDatabaseReference.removeEventListener(tmpChildEventListener);
+            tmpChildEventListener = null;
         }
     }
 
